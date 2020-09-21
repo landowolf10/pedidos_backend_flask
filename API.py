@@ -4,6 +4,7 @@ from db_config import mysql
 from flask import jsonify, request
 import json
 import requests
+from pyfcm import FCMNotification
 
 
 @app.route('/users', methods=['POST'])
@@ -255,7 +256,7 @@ def deleteProduct(id):
 
 @app.route('/push', methods=['POST'])
 def pushNotification():
-    serverToken = 'AAAAuQBCBPE:APA91bGKiYJ_hPLifHUJebsjMSjlLUvjkoLpYcTCPDTkgHy7hwlOR6rSa0w3CFrfG7qg8p-p9jerFNoQT5G5DKMMyBz8JvJ4rzK0xGv_VCdCyHKWnbY3B0PLCj4TQlP7t_7S9IwABEum'
+    """serverToken = 'AAAAuQBCBPE:APA91bGKiYJ_hPLifHUJebsjMSjlLUvjkoLpYcTCPDTkgHy7hwlOR6rSa0w3CFrfG7qg8p-p9jerFNoQT5G5DKMMyBz8JvJ4rzK0xGv_VCdCyHKWnbY3B0PLCj4TQlP7t_7S9IwABEum'
     topic = 'restaurant_topic'
 
     jsonData = request.json
@@ -289,7 +290,7 @@ def pushNotification():
             'body': 'Nuevo pedido realizado',
             'click_action': 'FLUTTER_NOTIFICATION_CLICK'
         },
-        'to': 'topics/' + topic,
+        'to': 'topic/' + topic,
         'priority': 'high',
         'data': dataPayLoad,
     }
@@ -300,7 +301,37 @@ def pushNotification():
 
     print('RESPONSE: ' + str(response.json()))
 
-    return response.json()
+    return response.json()"""
+
+    push_service = FCMNotification(api_key="AAAAuQBCBPE:APA91bGKiYJ_hPLifHUJebsjMSjlLUvjkoLpYcTCPDTkgHy7hwlOR6rSa0w3CFrfG7qg8p-p9jerFNoQT5G5DKMMyBz8JvJ4rzK0xGv_VCdCyHKWnbY3B0PLCj4TQlP7t_7S9IwABEum")
+
+    jsonData = request.json
+
+    cliente = jsonData['cliente']
+    pedido = jsonData['pedido']
+    cantidad = jsonData['cantidad']
+    telefono = jsonData['telefono']
+    colonia = jsonData['colonia']
+    calle = jsonData['calle']
+    numero = jsonData['numero']
+
+    dataPayLoad = {
+        "cliente": cliente,
+        "pedido": pedido,
+        "cantidad": cantidad,
+        "telefono": telefono,
+        "colonia": colonia,
+        "calle": calle,
+        "numero": numero,
+    }
+
+    #registration_id = "fBkUZcZIQmedz4br09Joj0:APA91bGR35q5a7nrLdet2vdoWTagfuvhQujVcxD6xXx6ybjxPqeADexkwjW9CEo9lNJmJ25bZWrimO0c9SFc0vlO0sV34QA_uDAyDU0VsvxXgd7AxMSchnZZfJS3ddvreMu0G-P9le54"
+    message_title = "Pedido"
+    message_body = "Nuevo pedido realizado"
+    #result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title, message_body=message_body, click_action='FLUTTER_NOTIFICATION_CLICK')
+    result = push_service.notify_topic_subscribers(topic_name="restaurant_topic", message_title=message_title, message_body=message_body, click_action='FLUTTER_NOTIFICATION_CLICK', data_message=dataPayLoad)
+
+    return result
 
 if __name__ == '__main__':
     app.run()

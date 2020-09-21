@@ -1,6 +1,4 @@
-import pymysql
 from app import app
-from db_config import mysql
 from flask import jsonify, request, render_template
 import os
 
