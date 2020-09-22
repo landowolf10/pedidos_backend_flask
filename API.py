@@ -186,29 +186,6 @@ def createProduct():
         cursor.close()
         conn.close()
 
-@app.route('/platillos', methods=['GET'])
-def getPlatillos():
-    try:
-        conn = mysql.connect()
-        cursor = conn.cursor()
-        cursor.callproc('mostrar_platillos')
-        row_headers = [x[0] for x in cursor.description]
-        rows = cursor.fetchall()
-
-        jsonData = []
-
-        for result in rows:
-            jsonData.append(dict(zip(row_headers, result)))
-
-        resp = jsonify(jsonData)
-
-        return resp
-    except Exception as e:
-        print(e)
-    finally:
-        cursor.close()
-        conn.close()
-
 @app.route('/products/<id>', methods=['PUT'])
 def updateProduct(id):
     try:
@@ -245,7 +222,29 @@ def deleteProduct(id):
 
         resp = jsonify('Product deleted successfully!')
         resp.status_code = 200
-        jsonData = request.json
+
+        return resp
+    except Exception as e:
+        print(e)
+    finally:
+        cursor.close()
+        conn.close()
+
+@app.route('/platillos', methods=['GET'])
+def getPlatillos():
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor()
+        cursor.callproc('mostrar_platillos')
+        row_headers = [x[0] for x in cursor.description]
+        rows = cursor.fetchall()
+
+        jsonData = []
+
+        for result in rows:
+            jsonData.append(dict(zip(row_headers, result)))
+
+        resp = jsonify(jsonData)
 
         return resp
     except Exception as e:
@@ -256,53 +255,6 @@ def deleteProduct(id):
 
 @app.route('/push', methods=['POST'])
 def pushNotification():
-    """serverToken = 'AAAAuQBCBPE:APA91bGKiYJ_hPLifHUJebsjMSjlLUvjkoLpYcTCPDTkgHy7hwlOR6rSa0w3CFrfG7qg8p-p9jerFNoQT5G5DKMMyBz8JvJ4rzK0xGv_VCdCyHKWnbY3B0PLCj4TQlP7t_7S9IwABEum'
-    topic = 'restaurant_topic'
-
-    jsonData = request.json
-
-    nombre = jsonData['nombre']
-    pedido = jsonData['pedido']
-    cantidad = jsonData['cantidad']
-    telefono = jsonData['telefono']
-    colonia = jsonData['colonia']
-    calle = jsonData['calle']
-    numero = jsonData['numero']
-
-    dataPayLoad = {
-        "nombre": nombre,
-        "pedido": pedido,
-        "cantidad": cantidad,
-        "telefono": telefono,
-        "colonia": colonia,
-        "calle": calle,
-        "numero": numero,
-    }
-
-    headers = {
-            'Content-Type': 'application/json',
-            'Authorization': 'key=' + serverToken,
-        }
-
-    body = {
-        'notification': {
-            'title': 'Pedido',
-            'body': 'Nuevo pedido realizado',
-            'click_action': 'FLUTTER_NOTIFICATION_CLICK'
-        },
-        'to': 'topic/' + topic,
-        'priority': 'high',
-        'data': dataPayLoad,
-    }
-
-
-    response = requests.post("https://fcm.googleapis.com/fcm/send", headers = headers, data=json.dumps(body))
-    print('STATUS: ' + str(response.status_code))
-
-    print('RESPONSE: ' + str(response.json()))
-
-    return response.json()"""
-
     push_service = FCMNotification(api_key="AAAAuQBCBPE:APA91bGKiYJ_hPLifHUJebsjMSjlLUvjkoLpYcTCPDTkgHy7hwlOR6rSa0w3CFrfG7qg8p-p9jerFNoQT5G5DKMMyBz8JvJ4rzK0xGv_VCdCyHKWnbY3B0PLCj4TQlP7t_7S9IwABEum")
 
     jsonData = request.json
@@ -325,10 +277,8 @@ def pushNotification():
         "numero": numero,
     }
 
-    #registration_id = "fBkUZcZIQmedz4br09Joj0:APA91bGR35q5a7nrLdet2vdoWTagfuvhQujVcxD6xXx6ybjxPqeADexkwjW9CEo9lNJmJ25bZWrimO0c9SFc0vlO0sV34QA_uDAyDU0VsvxXgd7AxMSchnZZfJS3ddvreMu0G-P9le54"
     message_title = "Pedido"
     message_body = "Nuevo pedido realizado"
-    #result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title, message_body=message_body, click_action='FLUTTER_NOTIFICATION_CLICK')
     result = push_service.notify_topic_subscribers(topic_name="restaurant_topic", message_title=message_title, message_body=message_body, click_action='FLUTTER_NOTIFICATION_CLICK', data_message=dataPayLoad)
 
     return result
