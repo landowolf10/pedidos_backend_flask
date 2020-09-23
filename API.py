@@ -253,6 +253,29 @@ def getPlatillos():
         cursor.close()
         conn.close()
 
+@app.route('/bebidas', methods=['GET'])
+def getBebidas():
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor()
+        cursor.callproc('mostrar_bebidas')
+        row_headers = [x[0] for x in cursor.description]
+        rows = cursor.fetchall()
+
+        jsonData = []
+
+        for result in rows:
+            jsonData.append(dict(zip(row_headers, result)))
+
+        resp = jsonify(jsonData)
+
+        return resp
+    except Exception as e:
+        print(e)
+    finally:
+        cursor.close()
+        conn.close()
+
 @app.route('/push', methods=['POST'])
 def pushNotification():
     push_service = FCMNotification(api_key="AAAAuQBCBPE:APA91bGKiYJ_hPLifHUJebsjMSjlLUvjkoLpYcTCPDTkgHy7hwlOR6rSa0w3CFrfG7qg8p-p9jerFNoQT5G5DKMMyBz8JvJ4rzK0xGv_VCdCyHKWnbY3B0PLCj4TQlP7t_7S9IwABEum")
